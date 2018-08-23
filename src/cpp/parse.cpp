@@ -2714,7 +2714,7 @@ bool Parser::rConstructorDecl(
     {
     case TOK_INTEGER:
       {
-        constructor.value()=codet("cpp-pure-virtual");
+        constructor.value() = exprt("cpp-pure-virtual");
         set_location(constructor.value(), value);
       }
       break;
@@ -2727,7 +2727,7 @@ bool Parser::rConstructorDecl(
           return false;
         }
 
-        constructor.value()=codet(ID_default);
+        constructor.value() = exprt(ID_default);
         set_location(constructor.value(), value);
       }
       break;
@@ -2740,7 +2740,7 @@ bool Parser::rConstructorDecl(
           return false;
         }
 
-        constructor.value()=codet(ID_cpp_delete);
+        constructor.value() = exprt(ID_cpp_delete);
         set_location(constructor.value(), value);
       }
       break;
@@ -2905,7 +2905,7 @@ bool Parser::rDeclaratorWithInit(
         }
 
         lex.get_token(tk);
-        declarator.value()=codet(ID_default);
+        declarator.value() = exprt(ID_default);
         set_location(declarator.value(), tk);
       }
       else if(lex.LookAhead(0)==TOK_DELETE) // C++0x
@@ -2917,7 +2917,7 @@ bool Parser::rDeclaratorWithInit(
         }
 
         lex.get_token(tk);
-        declarator.value()=codet(ID_cpp_delete);
+        declarator.value() = exprt(ID_cpp_delete);
         set_location(declarator.value(), tk);
       }
       else
@@ -3415,7 +3415,7 @@ bool Parser::rMemberInit(exprt &init)
   std::cout << std::string(__indent, ' ') << "Parser::rMemberInit 2\n";
 #endif
 
-  init=codet(ID_member_initializer);
+  init = exprt(ID_member_initializer);
   init.add(ID_member).swap(name);
 
   cpp_tokent tk1, tk2;
@@ -7187,7 +7187,7 @@ bool Parser::rFunctionBody(cpp_declaratort &declarator)
     if(lex.get_token(cb)!='}')
       return false;
 
-    declarator.value()=body;
+    declarator.value() = body.as_expr();
     return true;
   }
   else
