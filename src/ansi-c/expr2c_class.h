@@ -169,7 +169,13 @@ protected:
     unsigned precedence);
 
   std::string convert_function(
-    const exprt &src, const std::string &symbol,
+    const exprt::operandst &ops,
+    const std::string &symbol,
+    unsigned precedence);
+
+  std::string convert_function(
+    const exprt &src,
+    const std::string &symbol,
     unsigned precedence);
 
   std::string convert_complex(
