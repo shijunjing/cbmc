@@ -464,7 +464,6 @@ protected:
   void convert_dup2(exprt::operandst &op, exprt::operandst &results);
 
   code_switcht convert_switch(
-    java_bytecode_convert_methodt::address_mapt &address_map,
     const exprt::operandst &op,
     const java_bytecode_parse_treet::instructiont::argst &args,
     const source_locationt &location);
