@@ -534,3 +534,80 @@ C++ modules:
 Dependencies:
   - [linking folder](\ref linking).
   - [typecheck](\ref section-goto-typecheck).
+
+\section java-trace-structure Java Trace Structure
+
+In the \ref goto-programs directory.
+
+**Key classes:**
+* \ref goto_tracet
+* \ref goto_trace_stept
+* \ref goto_trace_stept::typet
+
+A trace represents the execution of a program as a series of steps. The class 
+\ref goto_tracet contains an ordered list of \ref goto_trace_stept, each 
+representing a step. The main step types used in a Java program are:
+- function call
+- function return
+- assignment
+
+There are many types of step in goto_trace_stept, which are listed here: 
+\ref goto_trace_stept::typet, but this overview will focus on the main types 
+used in Java.
+
+\subsection general-step-structure General Step Structure
+
+Every goto_trace_stept has a type (\ref goto_trace_stept::typet), e.g. function
+call. The type of a step can be checked using the boolean functions such as 
+\ref goto_trace_stept::is_function_call(). 
+
+The remainder of the members of goto_tracet depend on the step type.
+
+\subsection function-call-step-structure Function Calls
+
+A function call step has the goto_trace_stept::typet 
+\ref goto_trace_stept::typet::FUNCTION_CALL 
+and signifies that the program is calling a function.
+The step contains a valid identifier of the function being called 
+(\ref goto_trace_stept::called_function) and a vector of the function arguments 
+(\ref goto_trace_stept::function_arguments).
+
+\subsection function-return-step-structure Function Return
+
+A function return step has the goto_trace_stept::typet 
+\ref goto_trace_stept::typet::FUNCTION_RETURN and signifies that the program is 
+exiting a function. There is no special information contained in a function 
+return step.
+
+\subsection assignment-step-structure Assignment
+
+An assignment step has the goto_trace_stept::typet 
+\ref goto_trace_stept::typet::ASSIGNMENT and signifies that the program is 
+making an assignment to a variable. For an assignment LHS = RHS, the step 
+contains the symbol representing the LHS
+(\ref goto_trace_stept::full_lhs) and the value expression representing the RHS 
+(\ref goto_trace_stept::full_lhs_value).
+
+The expressions on each side vary depending on the Java type, whether its a
+member assignment, whether its an assignment by reference, etc. Some examples:
+- A global variable assignment will have a LHS \ref symbolt containing the
+Java type information and an identifier that does not include a function
+identifier, e.g. `java::SomeClass.someGlobalField`, and a RHS expression
+containing the value, e.g. a \ref constant_exprt or a \ref struct_exprt.
+- A local variable assignment will have a LHS \ref symbolt containing the Java
+type information and an identifier that includes a function identifier, e.g.
+a parameter assignment like `java::SomeClass.<init>:()V::this`.
+- A member assignment will have a LHS \ref member_exprt containing the Java type
+information for the member, the component name (member name), and an operand for
+the containing class which contains an identifier for the containing class, a
+RHS expression containing the value. Inherited members have a nested member
+structure. Members of members are assigned using a series of single member
+assignments.
+
+\subsection other-steps Other steps
+
+In a trace of a Java program, there are other step types that are internal
+including:
+- goto_trace_stept::typet::ASSERT (failure), used in bytecode instrumentation
+- goto_trace_stept::typet::NONE (location-only), indicates that this step is no
+other known step type and appear in the trace when the source location changes.
