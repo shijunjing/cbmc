@@ -250,26 +250,29 @@ for(tmp_index = 0; tmp_index < dim_size; ++tmp_index)
 
 \section java-bytecode-remove-exceptions Remove exceptions
 
-When `remove_exceptions` is called on the goto model, the goto model contains
-complex instructions such as `CATCH-POP`, `CATCH-PUSH` and `THROW`. In order to
-analyze the goto model, the instructions must be simplified to use more basic
-instructions - this is called "lowering". This class lowers the `CATCH` and
-`THROW` instructions.
+When \ref remove_exceptions is called on the \ref goto_model, the goto model
+contains complex instructions such as `CATCH-POP`, `CATCH-PUSH` and `THROW`. In
+order to analyze the goto model, the instructions must be simplified to use more
+basic instructions - this is called "lowering". This class lowers the `CATCH`
+and `THROW` instructions.
 
-Exceptions that have been thrown, but not yet caught are stored the global
-`@inflight_exception`. When they have been caught, the global
-`@inflight_exception` is set back to null and ready for the next exception.
+`THROW` instructions are replaced by assigning to `@inflight_exception` and a
+goto to end of the function. `CATCH` instructions are replaced by a check of
+the `@inflight_exception` and setting it to null.
 
-\subsection Throw
+\subsection THROW
 
 Consider a simple method `testException(I)V`:
 
 ```java
-public void testException(int i) throws Exception {
-    if (i < 0) {
-        throw new Exception();
+public class TestExceptions {
+    int field;
+    public void testException(int i) throws Exception {
+        if (i < 0) {
+            throw new Exception();
+        }
+        field = i;
     }
-    field = i;
 }
 ```
 
@@ -277,7 +280,7 @@ The goto for `testException(I)V` before `remove_exceptions` (removing comments
 and replacing irrelevant parts with `...`) is:
 
 ```
-com.diffblue.regression.TestExceptions.testException(int) /* java::com.diffblue.regression.TestExceptions.testException:(I)V */
+TestExceptions.testException(int) /* java::TestExceptions.testException:(I)V */
   IF i >= 0 THEN GOTO 3
   struct java.lang.Exception *new_tmp0;
   new_tmp0 = new struct java.lang.Exception;
@@ -302,7 +305,7 @@ where there is a `THROW` instruction to be replaced.
 After passing the goto model through `remove_exceptions`, it is:
 
 ```
-com.diffblue.regression.TestExceptions.testException(int) /* java::com.diffblue.regression.TestExceptions.testException:(I)V */
+TestExceptions.testException(int) /* java::TestExceptions.testException:(I)V */
   IF i >= 0 THEN GOTO 4
   struct java.lang.Exception *new_tmp0;
   new_tmp0 = new struct java.lang.Exception;
@@ -326,24 +329,34 @@ com.diffblue.regression.TestExceptions.testException(int) /* java::com.diffblue.
 
 ```
 where now instead of the instruction `THROW`, the global variable
-`@inflight_exception` holds the thrown exception in ia separate goto statement.
+`@inflight_exception` holds the thrown exception in a separate goto statement.
 
-\subsection Catch
+\subsection CATCH-PUSH, CATCH-POP and EXCEPTION LANDING PAD
 
-Consider the method `catchSomething(I)V` that tries the above method `testException(I)V` and catches the exception:
+Consider the method `catchSomething(I)V` that tries the above method
+`testException(I)V` and catches the exception:
 
 ```java
-public void catchSomething(int i) {
-    try {
-        testException(i);
-    } catch (Exception e) {
+public class TestExceptions {
+    int field;
+    public void testException(int i) throws Exception {
+        if (i < 0) {
+            throw new Exception();
+        }
+        field = i;
+    }
+    public void catchSomething(int i) {
+        try {
+            testException(i);
+        } catch (Exception e) {
+        }
     }
 }
 ```
 
 The goto model before `remove_exceptions` is:
 ```
-com.diffblue.regression.TestExceptions.catchSomething(int) /* java::com.diffblue.regression.TestExceptions.catchSomething:(I)V */
+TestExceptions.catchSomething(int) /* java::TestExceptions.catchSomething:(I)V */
 
 ...
 
@@ -365,12 +378,14 @@ com.diffblue.regression.TestExceptions.catchSomething(int) /* java::com.diffblue
 ...
 
 ```
-which contains `CATCH` instructions that are intended to be replaced.
+The 'CATCH-PUSH' instruction signifies the start of the try block, the
+'CATCH-POP' instruction signifies the end of the try block, and the EXCEPTION
+LANDING POP signifies beginning of the catch block.
 
 After `remove_exceptions` the goto model is:
 
 ```
-com.diffblue.regression.TestExceptions.catchSomething(int) /* java::com.diffblue.regression.TestExceptions.catchSomething:(I)V */
+TestExceptions.catchSomething(int) /* java::TestExceptions.catchSomething:(I)V */
 
 ...
 
@@ -401,7 +416,11 @@ com.diffblue.regression.TestExceptions.catchSomething(int) /* java::com.diffblue
 5: ASSERT false // block 5
 6: END_FUNCTION
 ```
-where the `CATCH` instructions have been replaced with new goto statements.
+where the `CATCH-PUSH` has been replaced by a check on the `@inflight_exception`
+variable and goto statements, the `CATCH-POP` replaced by a check on the class
+of the exception and a goto statement, and the `EXCEPTION LANDING PAD` replaced
+by a section that assigns the exception to a local variable and sets the
+`@inflight_exception` back to null.
 
 \section java-bytecode-remove-instanceof Remove instanceof
 
