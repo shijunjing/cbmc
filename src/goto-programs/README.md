@@ -632,3 +632,7 @@ including:
 and properties
 - goto_trace_stept::typet::NONE (location-only), indicates that this step is no
 other known step type and appear in the trace when the source location changes.
+
+\subsection java-assignments Java Assignments
+
+See \ref java-trace.
