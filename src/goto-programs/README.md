@@ -574,6 +574,9 @@ The step contains a valid identifier of the function being called
 (\ref goto_trace_stept::function_arguments) and the identifier of the function
 of the call site (\ref goto_trace_stept::function).
 
+Following a function call, \ref assignment-step-structure assignments are made
+to each parameter, if there are any, including the `this` parameter.
+
 \subsection function-return-step-structure Function Return
 
 A function return step has the goto_trace_stept::typet 
@@ -581,13 +584,17 @@ A function return step has the goto_trace_stept::typet
 exiting a function. \ref goto_trace_stept::function is the function being 
 returned from.
 
+If the function has a return value, an \ref assignment-step-structure
+assignment will be made to a variable with identifier with suffix
+\ref remove_returns::RETURN_VALUE_SUFFIX.
+
 \subsection assignment-step-structure Assignment
 
-An assignment step has the goto_trace_stept::typet 
-\ref goto_trace_stept::typet::ASSIGNMENT and signifies that the program is 
-making an assignment to a variable. For an assignment LHS = RHS, the step 
+An assignment step has the goto_trace_stept::typet
+\ref goto_trace_stept::typet::ASSIGNMENT and signifies that the program is
+making an assignment to a variable. For an assignment LHS = RHS, the step
 contains the symbol representing the LHS
-(\ref goto_trace_stept::full_lhs) and the value expression representing the RHS 
+(\ref goto_trace_stept::full_lhs) and the value expression representing the RHS
 (\ref goto_trace_stept::full_lhs_value).
 
 \subsubsection java-assignments Java Assignments
@@ -597,7 +604,8 @@ member assignment, whether its an assignment by reference, etc. Some examples:
 - A global variable assignment will have a LHS \ref symbol_exprt containing the
 type information and an identifier that does not include a function
 identifier, e.g. `java::SomeClass.someGlobalField`, and a RHS expression
-containing the value, e.g. a \ref constant_exprt or a \ref struct_exprt.
+containing the value, e.g. a \ref constant_exprt, a \ref struct_exprt or an
+\ref address_of_exprt.
 - A local variable assignment will have a LHS \ref symbol_exprt containing the
 type information and an identifier that includes a function identifier, e.g.
 a parameter assignment like `java::SomeClass.<init>:()V::this` which corresponds
