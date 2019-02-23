@@ -237,19 +237,15 @@ void local_safe_pointerst::output_safe_dereferences(
     {
       out << "{";
       bool first = true;
-      for(auto subexpr_it = i_it->code.depth_begin(),
-            subexpr_end = i_it->code.depth_end();
-          subexpr_it != subexpr_end;
-          ++subexpr_it)
-      {
-        if(subexpr_it->id() == ID_dereference)
+      i_it->apply([&first, &out](const exprt &e) {
+        if(e.id() == ID_dereference)
         {
           if(!first)
             out << ", ";
           first = true;
-          format_rec(out, subexpr_it->op0());
+          format_rec(out, to_dereference_expr(e).pointer());
         }
-      }
+      });
       out << "}";
     }
 
