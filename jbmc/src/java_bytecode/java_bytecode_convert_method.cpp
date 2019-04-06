@@ -340,7 +340,6 @@ void java_bytecode_convert_method_lazy(
     member_type.set(ID_is_synchronized, true);
   if(m.is_static)
     member_type.set(ID_is_static, true);
-  member_type.set_native(m.is_native);
   member_type.set_is_varargs(m.is_varargs);
 
   if(m.is_bridge)
@@ -431,7 +430,6 @@ void java_bytecode_convert_methodt::convert(
   // to the symbol later.
   java_method_typet method_type =
     to_java_method_type(symbol_table.lookup_ref(method_identifier).type);
-  method_type.set_is_final(m.is_final);
   method_return_type = method_type.return_type();
   java_method_typet::parameterst &parameters = method_type.parameters();
 
@@ -2212,7 +2210,6 @@ void java_bytecode_convert_methodt::convert_invoke(
                          id2string(symbol.base_name) + "()";
     symbol.type = method_type;
     symbol.type.set(ID_access, ID_private);
-    to_java_method_type(symbol.type).set_is_final(true);
     symbol.value.make_nil();
     symbol.mode = ID_java;
     assign_parameter_names(
