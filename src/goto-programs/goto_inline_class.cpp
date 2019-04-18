@@ -158,33 +158,31 @@ void goto_inlinet::replace_return(
   goto_programt &dest, // inlining this
   const exprt &lhs) // lhs in caller
 {
-  for(goto_programt::instructionst::iterator
-      it=dest.instructions.begin();
-      it!=dest.instructions.end();
-      it++)
+  for(auto &instruction : dest.instructions)
   {
-    if(it->is_return())
+    if(instruction.is_return())
     {
       if(lhs.is_not_nil())
       {
-        if(it->code.operands().size()!=1)
+        if(instruction.code.operands().size() != 1)
         {
-          warning().source_location=it->code.find_source_location();
+          warning().source_location = instruction.code.find_source_location();
           warning() << "return expects one operand!\n"
-                    << it->code.pretty() << eom;
+                    << instruction.code.pretty() << eom;
           continue;
         }
 
         // a typecast may be necessary if the declared return type at the call
         // site differs from the defined return type
-        it->code = code_assignt(
-          lhs, typecast_exprt::conditional_cast(it->code.op0(), lhs.type()));
-        it->type=ASSIGN;
+        instruction.code = code_assignt(
+          lhs,
+          typecast_exprt::conditional_cast(instruction.code.op0(), lhs.type()));
+        instruction.type = ASSIGN;
       }
-      else if(!it->code.operands().empty())
+      else if(!instruction.code.operands().empty())
       {
-        it->code=code_expressiont(it->code.op0());
-        it->type=OTHER;
+        instruction.code = code_expressiont(instruction.code.op0());
+        instruction.type = OTHER;
       }
     }
   }
