@@ -180,14 +180,11 @@ void goto_inlinet::replace_return(
         it->code = code_assignt(
           lhs, typecast_exprt::conditional_cast(it->code.op0(), lhs.type()));
         it->type=ASSIGN;
-
-        it++;
       }
       else if(!it->code.operands().empty())
       {
         it->code=code_expressiont(it->code.op0());
         it->type=OTHER;
-        it++;
       }
     }
   }
